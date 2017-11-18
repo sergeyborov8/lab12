@@ -1,37 +1,48 @@
 #include <iostream>
-#include <functional>
 #include <future>
 #include <thread>
 #include <curl/curl.h>
 
-void GetResponse(std::future<char*> &fut)
-{
-    CURL *curl;
-    CURLcode res;
-    char *url = fut.get();
-    curl = curl_easy_init();
-    if (curl) {
-      curl_easy_setopt(curl, CURLOPT_URL, url);
-      curl_easy_setopt(curl, CURLOPT_NOBODY, 1);
+int main(int argc, char *argv[]) {
+
+    CURL *curl = curl_easy_init();
+
+    std::string url;
+
+    if (argc < 2) {
+        std::cout << "enter: ";
+        std::getline(std::cin, url);
+    } else {
+        url = argv[1];
     }
-    res = curl_easy_perform(curl);
-    long http_code = 0;
-    curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &http_code);
-    std::cout << "Response answer == " << http_code << '\n';
-}
 
-int main(int argc, char *argv[])
-{
-    char *url = argv[1];
+    if (curl) {
 
-    std::promise<char*> prom;
+        curl_easy_setopt(curl, CURLOPT_URL, Url.c_str());
+        curl_easy_setopt(curl, CURLOPT_NOBODY, 1);
+        curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, false);
+        curl_easy_setopt(curl, CURLOPT_TIMEOUT_MS, 3000);
 
-    std::future<char*> fut = prom.get_future();
+        std::promise<CURLcode> promise;
 
-    std::thread th1 (GetResponse, std::ref(fut));
+        auto response = promise.get_future();
 
-    prom.set_value(url);
+        std::thread request([curl, &promise]() {
+            promise.set_value(curl_easy_perform(curl));
+        });
 
-    th1.join();
+        request.detach();
+
+        long answer;
+
+        auto res = response.get();
+
+        if (res == CURLE_OK) {
+            curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &answer);
+            std::cout << answer << std::endl;
+        }
+
+        curl_easy_cleanup(curl);
+    }
     return 0;
 }
