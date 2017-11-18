@@ -1,5 +1,0 @@
-language: cpp
-
-script:
-- cd _build
-- ./main
