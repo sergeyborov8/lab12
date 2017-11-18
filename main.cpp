@@ -18,7 +18,7 @@ int main(int argc, char *argv[]) {
 
     if (curl) {
 
-        curl_easy_setopt(curl, CURLOPT_URL, Url.c_str());
+        curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
         curl_easy_setopt(curl, CURLOPT_NOBODY, 1);
         curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, false);
         curl_easy_setopt(curl, CURLOPT_TIMEOUT_MS, 3000);
