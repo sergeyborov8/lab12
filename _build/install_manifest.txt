@@ -1,0 +1,1 @@
+/home/serg/projects/lab12/_install/bin/main
